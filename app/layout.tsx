@@ -86,7 +86,7 @@ const dmSans = DM_Sans({
 
 export const metadata: Metadata = {
   title: "Flow - AI App Builder",
-  description: "",
+  description: "Build apps with AI",
   icons: {
     icon: "/logo-short.jpeg",
   },
@@ -107,9 +107,8 @@ export default function RootLayout({
   return (
     <ClerkProvider
       appearance={{
-        baseTheme: dark, // Change from 'theme' to 'baseTheme'
+        theme: dark,
       }}
-      // Add this to prevent script tag issues
       afterSignOutUrl="/"
       signInUrl="/sign-in"
       signUpUrl="/sign-up"

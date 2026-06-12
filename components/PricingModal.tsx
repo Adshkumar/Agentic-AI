@@ -1,7 +1,6 @@
 "use client";
 
 import { useAuth, SignInButton } from "@clerk/nextjs";
-import { CheckoutButton } from "@clerk/nextjs/experimental";
 import { ArrowRight, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -15,6 +14,8 @@ import {
 } from "@/components/ui/dialog";
 import { BlueTitle, GrayTitle } from "./reusables";
 import { PRICING_PLANS } from "@/lib/constants";
+import { useState } from "react";
+import { toast } from "sonner";
 
 interface PricingModalProps {
   children: React.ReactNode;
@@ -26,6 +27,7 @@ export function PricingModal({
   reason = "upgrade",
 }: PricingModalProps) {
   const { isSignedIn, has } = useAuth();
+  const [isLoading, setIsLoading] = useState<string | null>(null);
 
   const title =
     reason === "credits" ? "You're out of credits" : "Upgrade your plan";
@@ -44,9 +46,25 @@ export function PricingModal({
     ? has?.({ plan: "pro" })
       ? "pro"
       : has?.({ plan: "starter" })
-      ? "starter"
-      : "free"
+        ? "starter"
+        : "free"
     : null;
+
+  const handleCheckout = async (plan: (typeof PRICING_PLANS)[number]) => {
+    if (!plan.planId) {
+      toast.info("Free plan selected. No payment needed.");
+      return;
+    }
+
+    setIsLoading(plan.key);
+
+    setTimeout(() => {
+      toast.info(
+        `Selected ${plan.label} plan - $${plan.price}/month. Payment setup coming soon.`
+      );
+      setIsLoading(null);
+    }, 1000);
+  };
 
   return (
     <Dialog>
@@ -80,7 +98,6 @@ export function PricingModal({
                     : "border-white/12 bg-[#0a0a0a]"
                 )}
               >
-                {/* Most popular pill */}
                 {plan.featured && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2">
                     <span className="rounded-full border border-blue-500/20 bg-[#0a0a0a] px-3 py-1 text-[11px] font-medium text-blue-400">
@@ -89,7 +106,6 @@ export function PricingModal({
                   </div>
                 )}
 
-                {/* Plan name + active badge */}
                 <div className="mb-1 flex items-center gap-2">
                   <p className="text-sm font-semibold text-white/90">
                     {plan.label}
@@ -101,12 +117,10 @@ export function PricingModal({
                   )}
                 </div>
 
-                {/* Description */}
                 <p className="mb-6 text-xs leading-relaxed text-white/35">
                   {plan.description}
                 </p>
 
-                {/* Price */}
                 <div className="mb-1 flex items-baseline gap-1">
                   <span className="font-serif text-4xl">
                     {plan.price === 0 ? (
@@ -123,7 +137,6 @@ export function PricingModal({
                   {plan.price === 0 ? "Always free" : "Only billed monthly"}
                 </p>
 
-                {/* Feature list */}
                 <div className="mb-8 space-y-3 border-t border-white/6 pt-6">
                   {plan.features.map((f) => (
                     <div key={f} className="flex items-center gap-2.5">
@@ -145,7 +158,6 @@ export function PricingModal({
                   ))}
                 </div>
 
-                {/* CTA button */}
                 <div className="mt-auto">
                   {isActive ? (
                     <Button
@@ -175,48 +187,21 @@ export function PricingModal({
                         </Button>
                       </SignInButton>
                     )
-                  ) : isSignedIn ? (
-                    <CheckoutButton
-                      planId={plan.planId}
-                      planPeriod="month"
-                      checkoutProps={{
-                        appearance: {
-                          elements: {
-                            drawerRoot: {
-                              zIndex: 2000,
-                            },
-                          },
-                        },
-                      }}
-                    >
-                      <Button
-                        className={cn(
-                          "w-full rounded-full text-sm font-semibold transition-all",
-                          plan.featured
-                            ? "bg-blue-500 text-white hover:bg-blue-400 active:scale-95"
-                            : "border border-white/10 bg-transparent text-white/60 hover:bg-white/6 hover:text-white/90"
-                        )}
-                        variant="ghost"
-                      >
-                        {isDowngrade ? "Downgrade" : "Upgrade"}
-                        <ArrowRight className="h-3.5 w-3.5" />
-                      </Button>
-                    </CheckoutButton>
                   ) : (
-                    <SignInButton mode="modal">
-                      <Button
-                        className={cn(
-                          "w-full rounded-full text-sm font-semibold transition-all",
-                          plan.featured
-                            ? "bg-blue-500 text-white hover:bg-blue-400 active:scale-95"
-                            : "border border-white/10 bg-transparent text-white/60 hover:bg-white/6 hover:text-white/90"
-                        )}
-                        variant="ghost"
-                      >
-                        Upgrade
-                        <ArrowRight className="h-3.5 w-3.5" />
-                      </Button>
-                    </SignInButton>
+                    <Button
+                      onClick={() => handleCheckout(plan)}
+                      disabled={isLoading === plan.key}
+                      className={cn(
+                        "w-full rounded-full text-sm font-semibold transition-all",
+                        plan.featured
+                          ? "bg-blue-500 text-white hover:bg-blue-400 active:scale-95"
+                          : "border border-white/10 bg-transparent text-white/60 hover:bg-white/6 hover:text-white/90"
+                      )}
+                      variant="ghost"
+                    >
+                      {isLoading === plan.key ? "Loading..." : isDowngrade ? "Downgrade" : "Upgrade"}
+                      <ArrowRight className="h-3.5 w-3.5" />
+                    </Button>
                   )}
                 </div>
               </div>
