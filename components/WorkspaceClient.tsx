@@ -1,4 +1,3 @@
-// WorkspaceClient.tsx
 "use client";
 
 import { useState, useCallback, useRef, useEffect } from "react";
@@ -107,7 +106,10 @@ export function WorkspaceClient({
   const handleGenerate = useCallback(
     async (prompt: string, imageUrl?: string) => {
       if (isGenerating) return;
-      if (credits < MIN_CREDITS_TO_GENERATE) return;
+      if (credits < MIN_CREDITS_TO_GENERATE) {
+        toast.error("Not enough credits. Please upgrade your plan.");
+        return;
+      }
 
       const userMessage: Message = {
         role: "user",
@@ -142,11 +144,17 @@ export function WorkspaceClient({
         });
 
         if (res.status === 402) {
+          toast.error("Not enough credits. Please upgrade your plan.");
           setMessages((prev) => prev.slice(0, -1));
           return;
         }
         if (res.status === 429) {
           toast.error("Too many requests. Please slow down.");
+          setMessages((prev) => prev.slice(0, -1));
+          return;
+        }
+        if (res.status === 503) {
+          toast.error("AI service is busy. Please try again in a moment.");
           setMessages((prev) => prev.slice(0, -1));
           return;
         }
@@ -196,6 +204,7 @@ export function WorkspaceClient({
                 "",
                 `/workspace?id=${event.workspaceId}`
               );
+              toast.success("App generated successfully!");
             } else if (event.type === "error") {
               const err = new Error(event.message);
               (err as any).isExpected = true;
@@ -224,15 +233,16 @@ export function WorkspaceClient({
         setStatusLog([]);
       }
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [credits, isGenerating, userId]
-    // fileData intentionally omitted — read via fileDataRef
   );
 
   const handleImprove = useCallback(
     async (userRequest: string) => {
       if (isGenerating || isImproving) return;
-      if (credits < MIN_CREDITS_TO_GENERATE) return;
+      if (credits < MIN_CREDITS_TO_GENERATE) {
+        toast.error("Not enough credits.");
+        return;
+      }
       if (!workspaceIdRef.current) return;
 
       // Read fileData from ref — never stale, never causes recreating this fn
@@ -333,6 +343,7 @@ export function WorkspaceClient({
                 };
                 return updated;
               });
+              toast.success("App improved successfully!");
             } else if (event.type === "error") {
               throw new Error(event.message);
             }
@@ -351,8 +362,6 @@ export function WorkspaceClient({
         setIsImproving(false);
       }
     },
-    // fileData intentionally omitted — read via fileDataRef above
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [credits, isGenerating, isImproving, userId]
   );
 
@@ -368,9 +377,12 @@ export function WorkspaceClient({
 
   return (
     <>
-      {/* Mobile blocker — visible only on small screens */}
+      {/* Mobile blocker — visible only on small screens with generation support */}
       <div className="md:hidden">
-        <MobileBlocker />
+        <MobileBlocker
+          onGenerate={handleGenerate}
+          isGenerating={isGenerating}
+        />
       </div>
 
       {/* Workspace — visible only on md+ screens */}
