@@ -44,9 +44,7 @@
 
 "use client";
 
-import { useState } from "react";
-import { Monitor, Smartphone, Send, Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Monitor, Smartphone } from "lucide-react";
 
 interface MobileBlockerProps {
   onGenerate?: (prompt: string, imageUrl?: string) => void;
@@ -54,15 +52,6 @@ interface MobileBlockerProps {
 }
 
 export function MobileBlocker({ onGenerate, isGenerating = false }: MobileBlockerProps) {
-  const [prompt, setPrompt] = useState("");
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!prompt.trim() || isGenerating || !onGenerate) return;
-    await onGenerate(prompt);
-    setPrompt("");
-  };
-
   return (
     <div className="flex min-h-[calc(100vh-3.5rem)] flex-col bg-[#0a0a0a]">
       {/* Main content area with original design */}
@@ -101,36 +90,7 @@ export function MobileBlocker({ onGenerate, isGenerating = false }: MobileBlocke
         </div>
       </div>
 
-      {/* Input area - added at bottom to not interfere with original design */}
-      <div className="border-t border-white/10 p-4 bg-white/5">
-        <form onSubmit={handleSubmit} className="space-y-3">
-          <textarea
-            value={prompt}
-            onChange={(e) => setPrompt(e.target.value)}
-            placeholder="Describe what you want to build... (e.g., 'A todo app with dark mode')"
-            className="w-full h-24 bg-black/50 border border-white/10 rounded-lg p-3 text-white placeholder:text-white/30 focus:outline-none focus:border-blue-500 resize-none text-sm"
-            disabled={isGenerating}
-          />
-
-          <Button
-            type="submit"
-            disabled={isGenerating || !prompt.trim()}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-lg py-2"
-          >
-            {isGenerating ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                Generating...
-              </>
-            ) : (
-              <>
-                <Send className="h-4 w-4 mr-2" />
-                Generate App (Mobile)
-              </>
-            )}
-          </Button>
-        </form>
-      </div>
+      {/* REMOVED: Input area with generation form - not needed on mobile blocker */}
     </div>
   );
 }

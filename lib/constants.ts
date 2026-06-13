@@ -1,7 +1,7 @@
 export const PLANS = {
   free: {
     label: "Free",
-    credits: 10,
+    credits: 50,
     price: 0,
   },
   starter: {
@@ -29,7 +29,7 @@ export const PRICING_PLANS = [
     featured: false,
     planId: null,
     active: true,
-    features: ["10 generations / month", "Live preview", "Export to zip"],
+    features: ["50 generations / month", "Live preview", "Export to zip"],
   },
   {
     key: "starter",
