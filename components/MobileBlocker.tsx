@@ -102,7 +102,7 @@ export function MobileBlocker({ onGenerate, isGenerating = false }: MobileBlocke
       </div>
 
       {/* Input area for mobile generation */}
-      <div className="border-t border-white/10 p-4 bg-white/5">
+      {/* <div className="border-t border-white/10 p-4 bg-white/5">
         <form onSubmit={handleSubmit} className="space-y-3">
           <textarea
             value={prompt}
@@ -112,7 +112,7 @@ export function MobileBlocker({ onGenerate, isGenerating = false }: MobileBlocke
             disabled={isGenerating}
           />
 
-          {/* <Button
+          <Button
             type="submit"
             disabled={isGenerating || !prompt.trim()}
             className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-lg py-2"
@@ -128,9 +128,9 @@ export function MobileBlocker({ onGenerate, isGenerating = false }: MobileBlocke
                 Generate App
               </>
             )}
-          </Button> */}
+          </Button>
         </form>
-      </div>
+      </div> */}
     </div>
   );
 }
