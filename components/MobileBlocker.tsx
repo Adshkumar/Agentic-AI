@@ -112,7 +112,7 @@ export function MobileBlocker({ onGenerate, isGenerating = false }: MobileBlocke
             disabled={isGenerating}
           />
 
-          <Button
+          {/* <Button
             type="submit"
             disabled={isGenerating || !prompt.trim()}
             className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-lg py-2"
@@ -128,7 +128,7 @@ export function MobileBlocker({ onGenerate, isGenerating = false }: MobileBlocke
                 Generate App
               </>
             )}
-          </Button>
+          </Button> */}
         </form>
       </div>
     </div>
