@@ -1,8 +1,7 @@
-# Full Stack Agentic App Builder with Next JS, Supabase, Gemini AI, Cline SDK, Shadcn UI Tutorial 🔥🔥
+# Full Stack Agentic App Builder with Next JS, Supabase, Gemini AI, Cline SDK, Shadcn UI  🔥🔥
 
-## https://www.youtube.com/watch?v=UUK93oW0SaA
 
-<img width="1280" height="720" alt="1" src="https://github.com/user-attachments/assets/0170ace8-9451-40b0-8d8e-d5534a05bba1" />
+<img width="1280" height="720" alt="1" src="./Agentic-AI-Frame/Agentic-AI-frame.png" />
 
 ---
 
