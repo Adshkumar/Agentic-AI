@@ -29,7 +29,7 @@ export async function getWorkspaceById(
   workspaceId: string,
   userId: string
 ): Promise<WorkspaceData> {
-  const workspace = await db.workspace.findUnique({
+  const workspace = await db.workspace.findFirst({
     where: { id: workspaceId, userId },
     select: {
       id: true,

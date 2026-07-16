@@ -26,12 +26,12 @@ export async function POST(request: NextRequest) {
   };
 
   const user = await db.user.findUnique({
-    where: { id: userId, clerkId },
-    select: { id: true, credits: true, plan: true },
+    where: { id: userId },
+    select: { id: true, credits: true, plan: true, clerkId: true },
   });
 
-  if (!user)
-    return Response.json({ message: "User not found" }, { status: 404 });
+  if (!user || user.clerkId !== clerkId)
+    return Response.json({ message: "User not found or unauthorized" }, { status: 404 });
 
   if (user.plan !== "pro")
     return Response.json({ message: "Upgrade required" }, { status: 403 });
@@ -166,9 +166,13 @@ RULES:
           title: fileData.title,
         };
 
+        // Ensure the workspace belongs to the user, then update by id within a transaction
+        const existing = await db.workspace.findFirst({ where: { id: workspaceId, userId } });
+        if (!existing) throw new Error("Workspace not found or unauthorized");
+
         await db.$transaction([
           db.workspace.update({
-            where: { id: workspaceId, userId },
+            where: { id: workspaceId },
             data: { fileData: newFileData as never },
           }),
           db.user.update({

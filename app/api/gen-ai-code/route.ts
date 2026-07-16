@@ -119,11 +119,13 @@ export async function POST(request: NextRequest) {
   }
 
   const user = await db.user.findUnique({
-    where: { id: userId, clerkId },
-    select: { id: true, credits: true },
+    where: { id: userId },
+    select: { id: true, credits: true, clerkId: true },
   });
 
-  if (!user) return Response.json({ message: "User not found" }, { status: 404 });
+  if (!user || user.clerkId !== clerkId) {
+    return Response.json({ message: "User not found or unauthorized" }, { status: 404 });
+  }
   if (user.credits < CREDIT_COST_PER_GENERATION) {
     return Response.json({ message: "Insufficient credits" }, { status: 402 });
   }
@@ -265,16 +267,44 @@ export async function POST(request: NextRequest) {
         { role: "assistant", content: assistantMessage },
       ];
 
-      const [workspace] = await db.$transaction([
-        workspaceId
-          ? db.workspace.update({
-            where: { id: workspaceId, userId },
-            data: {
-              messages: updatedMessages as never,
-              fileData: newFileData as never,
-            },
-          })
-          : db.workspace.create({
+      let workspace;
+      if (workspaceId) {
+        const existing = await db.workspace.findFirst({ where: { id: workspaceId, userId } });
+        if (existing) {
+          const [updatedWorkspace] = await db.$transaction([
+            db.workspace.update({
+              where: { id: workspaceId },
+              data: {
+                messages: updatedMessages as never,
+                fileData: newFileData as never,
+              },
+            }),
+            db.user.update({
+              where: { id: userId },
+              data: { credits: { decrement: CREDIT_COST_PER_GENERATION } },
+            }),
+          ]);
+          workspace = updatedWorkspace;
+        } else {
+          const [createdWorkspace] = await db.$transaction([
+            db.workspace.create({
+              data: {
+                userId,
+                title: aiTitle ?? lastUserMessage.content.slice(0, 80),
+                messages: updatedMessages as never,
+                fileData: newFileData as never,
+              },
+            }),
+            db.user.update({
+              where: { id: userId },
+              data: { credits: { decrement: CREDIT_COST_PER_GENERATION } },
+            }),
+          ]);
+          workspace = createdWorkspace;
+        }
+      } else {
+        const [createdWorkspace] = await db.$transaction([
+          db.workspace.create({
             data: {
               userId,
               title: aiTitle ?? lastUserMessage.content.slice(0, 80),
@@ -282,11 +312,13 @@ export async function POST(request: NextRequest) {
               fileData: newFileData as never,
             },
           }),
-        db.user.update({
-          where: { id: userId },
-          data: { credits: { decrement: CREDIT_COST_PER_GENERATION } },
-        }),
-      ]);
+          db.user.update({
+            where: { id: userId },
+            data: { credits: { decrement: CREDIT_COST_PER_GENERATION } },
+          }),
+        ]);
+        workspace = createdWorkspace;
+      }
 
       const updatedUser = await db.user.findUnique({
         where: { id: userId },
