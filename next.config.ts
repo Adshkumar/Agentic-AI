@@ -8,6 +8,9 @@ const nextConfig: NextConfig = {
     "@cline/llms",
     "@cline/shared",
   ],
+  turbopack: {
+    root: __dirname,
+  },
 };
 
 export default nextConfig;
