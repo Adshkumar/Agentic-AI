@@ -32,10 +32,17 @@ function EmptyState() {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default async function ProjectsPage() {
-  const { userId } = await auth();
-  if (!userId) redirect("/");
+  let projects = [] as Awaited<ReturnType<typeof getUserProjects>>;
+  try {
+    const { userId } = await auth();
+    if (!userId) return redirect("/");
 
-  const projects = await getUserProjects();
+    projects = await getUserProjects();
+  } catch (err) {
+    console.error("[ProjectsPage] auth error:", err);
+    // If auth or DB fails, redirect to home so the page doesn't crash on the server
+    return redirect("/");
+  }
 
   return (
     <main className="min-h-screen bg-[#0a0a0a] px-4 py-10">
