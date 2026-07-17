@@ -7,6 +7,8 @@ import { getUserProjects } from "@/actions/projects";
 import { BlueTitle } from "@/components/reusables";
 import { Button } from "@/components/ui/button";
 
+export const dynamic = "force-dynamic";
+
 // ─── Empty state ──────────────────────────────────────────────────────────────
 
 function EmptyState() {

@@ -1,6 +1,8 @@
 import { WorkspaceClient } from "@/components/WorkspaceClient";
 import { getWorkspaceUser, getWorkspaceById } from "@/actions/workspace";
 
+export const dynamic = "force-dynamic";
+
 interface WorkspacePageProps {
   searchParams: Promise<{ prompt?: string; id?: string }>;
 }
